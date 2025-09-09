@@ -28,6 +28,28 @@ Trick Lightroom allows you to modify the camera identification in RAW files so y
 
 This tool is created purely for experimental and entertainment purposes. The results may vary significantly from actual camera profiles.
 
+## License
+
+This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0). See the [LICENSE](LICENSE) file for details.
+
+This project uses the following open source software:
+
+### ExifTool
+- Author: Phil Harvey
+- License: Perl Artistic License
+- Website: https://exiftool.org/
+- License Details: https://exiftool.org/license.html
+
+ExifTool is used for reading and writing EXIF metadata in image files. It is available under the Perl Artistic License.
+
+### PySide6 (Qt for Python)
+- Author: Qt Company
+- License: LGPL v3.0
+- Website: https://www.qt.io/qt-for-python
+- License Details: https://doc.qt.io/qtforpython-6/licenses.html
+
+PySide6 is used for the graphical user interface. It is available under the LGPL v3.0 license.
+
 ---
 
 # Trick Lightroom (한국어)
@@ -59,3 +81,25 @@ Trick Lightroom은 RAW 파일의 카메라 EXIF 정보를 수정하여 라이트
 ## 면책사항
 
 이 도구는 순전히 실험적이고 재미를 위한 목적으로 제작되었습니다. 실제 카메라 프로필과는 상당히 다른 결과가 나올 수 있습니다.
+
+## 라이선스
+
+이 프로젝트는 GNU Affero General Public License v3.0 (AGPL-3.0) 라이선스를 따릅니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
+
+이 프로젝트는 다음과 같은 오픈소스 소프트웨어를 사용합니다:
+
+### ExifTool
+- 제작자: Phil Harvey
+- 라이선스: Perl Artistic License
+- 웹사이트: https://exiftool.org/
+- 라이선스 세부정보: https://exiftool.org/license.html
+
+ExifTool은 이미지 파일의 EXIF 메타데이터를 읽고 쓰는 데 사용됩니다. Perl Artistic License 하에 제공됩니다.
+
+### PySide6 (Qt for Python)
+- 제작자: Qt Company
+- 라이선스: LGPL v3.0
+- 웹사이트: https://www.qt.io/qt-for-python
+- 라이선스 세부정보: https://doc.qt.io/qtforpython-6/licenses.html
+
+PySide6는 그래픽 사용자 인터페이스를 위해 사용됩니다. LGPL v3.0 라이선스 하에 제공됩니다.
