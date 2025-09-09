@@ -23,8 +23,39 @@ Trick Lightroom allows you to modify the camera identification in RAW files so y
 
 - Windows OS
 - Adobe DNG Converter
-- Adobe Lightroom
 
 ## Disclaimer
 
 This tool is created purely for experimental and entertainment purposes. The results may vary significantly from actual camera profiles.
+
+---
+
+# Trick Lightroom (한국어)
+
+RAW 파일의 EXIF 정보를 변경하여 다른 카메라의 프로필을 실험해볼 수 있는 유틸리티입니다.
+
+## 개요
+
+Trick Lightroom은 RAW 파일의 카메라 식별 정보를 수정하여 라이트룸에서 다른 카메라의 프로필을 적용해볼 수 있게 해주는 도구입니다. 예를 들어, 소니 카메라로 촬영한 RAW 파일을 후지필름 카메라로 촬영한 것처럼 인식하게 할 수 있습니다.
+
+**참고**: 이 도구는 순전히 재미를 위한 것입니다! 예를 들어 소니 RAW 파일에 후지필름 프로필을 적용한 결과물은 실제 후지필름 카메라의 RAW 파일에 동일한 프로필을 적용한 결과와는 당연히 다릅니다.
+
+## 사용 방법
+
+![스크린샷](/.github/screenshot.png)
+
+1. [Adobe 공식 웹사이트](https://helpx.adobe.com/kr/camera-raw/using/adobe-dng-converter.html)에서 Adobe DNG Converter를 다운로드하고 설치합니다
+2. [GitHub Releases](https://github.com/newboon/Trick_Lightroom/releases)에서 Trick Lightroom을 다운로드하고 실행합니다
+3. RAW 파일을 좌측 패널에 드래그 앤 드롭합니다 (예: DSC1000.ARW)
+4. 변환 버튼을 클릭하면 EXIF 정보가 변경된 DNG 파일이 생성됩니다 (예: DSC1000_GFX100.DNG)
+5. 생성된 DNG 파일을 라이트룸으로 불러와서 편집한 후 JPG 파일로 내보냅니다 (예: DSC1000_GFX100.JPG)
+6. 내보낸 JPG 파일을 우측 패널에 드래그 앤 드롭하고 복원 버튼을 클릭하면 원래 카메라의 EXIF 정보로 되돌아갑니다
+
+## 요구사항
+
+- Windows OS
+- Adobe DNG Converter
+
+## 면책사항
+
+이 도구는 순전히 실험적이고 재미를 위한 목적으로 제작되었습니다. 실제 카메라 프로필과는 상당히 다른 결과가 나올 수 있습니다.
