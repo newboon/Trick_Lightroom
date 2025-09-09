@@ -38,7 +38,7 @@ This project uses the following open source software:
 - Author: Phil Harvey
 - License: Perl Artistic License
 - Website: https://exiftool.org/
-- License Details: https://exiftool.org/license.html
+- License Details: https://exiftool.org/#license
 
 ExifTool is used for reading and writing EXIF metadata in image files. It is available under the Perl Artistic License.
 
@@ -92,7 +92,7 @@ Trick Lightroom은 RAW 파일의 카메라 EXIF 정보를 수정하여 라이트
 - 제작자: Phil Harvey
 - 라이선스: Perl Artistic License
 - 웹사이트: https://exiftool.org/
-- 라이선스 세부정보: https://exiftool.org/license.html
+- 라이선스 세부정보: https://exiftool.org/#license
 
 ExifTool은 이미지 파일의 EXIF 메타데이터를 읽고 쓰는 데 사용됩니다. Perl Artistic License 하에 제공됩니다.
 
