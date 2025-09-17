@@ -103,7 +103,7 @@ LANGUAGES = {
 CAMERA_DATA = { 
     "Canon EOS R5 Mark II": {"make": "Canon", "model": "Canon EOS R5m2", "unique": "Canon EOS R5 Mark II", "suffix": "R5M2"}, 
     "Nikon Z8": {"make": "NIKON CORPORATION", "model": "NIKON Z 8", "unique": "Nikon Z 8", "suffix": "Z8"}, 
-    "Sony RX1R3": {"make": "SONY", "model": "DSC-RX1RM3", "unique": "Sony DSC-RX1RM3", "suffix": "RX1R3"}, 
+    "Sony RX1R III": {"make": "SONY", "model": "DSC-RX1RM3", "unique": "Sony DSC-RX1RM3", "suffix": "RX1R3"}, 
     "Fujifilm GFX100RF (Bayer Sensor)": {"make": "FUJIFILM", "model": "GFX100RF", "unique": "Fujifilm GFX 100RF", "suffix": "GFX100RF"}, 
     "Fujifilm X-T5 (X-Trans Sensor)": {"make": "FUJIFILM", "model": "X-T5", "unique": "Fujifilm X-T5", "suffix": "XT5"}, 
     "Panasonic LUMIX DC-S9": {"make": "Panasonic", "model": "DC-S9", "unique": "Panasonic DC-S9", "suffix": "S9"}, 
