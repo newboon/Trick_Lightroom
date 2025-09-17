@@ -19,6 +19,14 @@ Trick Lightroom allows you to modify the camera identification in RAW files so y
 5. Import the generated DNG files into Lightroom, edit, and export as JPG (e.g., DSC1000_GFX100.JPG)
 6. Drop the exported JPG files into the right panel and click restore to revert EXIF data to the original camera
 
+For example, when you change the EXIF information to Fujifilm, Ricoh, or Panasonic cameras, you can use their Lightroom profiles as shown below:
+
+<div style="display: flex; justify-content: space-between;">
+    <img src="/.github/fuji.png" width="32%" alt="Fujifilm Profile">
+    <img src="/.github/ricoh.png" width="32%" alt="Ricoh Profile">
+    <img src="/.github/panasonic.png" width="32%" alt="Panasonic Profile">
+</div>
+
 ## Requirements
 
 - Windows OS
@@ -72,6 +80,14 @@ Trick Lightroom은 RAW 파일의 카메라 EXIF 정보를 수정하여 라이트
 4. 변환 버튼을 클릭하면 EXIF 정보가 변경된 DNG 파일이 생성됩니다 (예: DSC1000_GFX100.DNG)
 5. 생성된 DNG 파일을 라이트룸으로 불러와서 편집한 후 JPG 파일로 내보냅니다 (예: DSC1000_GFX100.JPG)
 6. 내보낸 JPG 파일을 우측 패널에 드래그 앤 드롭하고 복원 버튼을 클릭하면 원래 카메라의 EXIF 정보로 되돌아갑니다
+
+예를 들어 후지, 리코, 파나소닉 카메라로 EXIF 정보를 변경하면 각각 아래처럼 라이트룸 프로필을 사용할 수 있습니다:
+
+<div style="display: flex; justify-content: space-between;">
+    <img src="/.github/fuji.png" width="32%" alt="후지필름 프로필">
+    <img src="/.github/ricoh.png" width="32%" alt="리코 프로필">
+    <img src="/.github/panasonic.png" width="32%" alt="파나소닉 프로필">
+</div>
 
 ## 요구사항
 
