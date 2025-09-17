@@ -14,6 +14,8 @@ Trick Lightroom allows you to modify the camera identification in RAW files so y
 
 1. Download and install Adobe DNG Converter from [Adobe's official website](https://helpx.adobe.com/camera-raw/using/adobe-dng-converter.html)
 2. Download and run Trick Lightroom from [GitHub Releases](https://github.com/yourusername/Trick_Lightroom/releases)
+
+   For macOS version, visit here: https://github.com/dcbfs/Trick_Lightroom_Mac
 3. Drop your RAW files into the left panel (e.g., DSC1000.ARW)
 4. Click the convert button to generate DNG files with modified EXIF data (e.g., DSC1000_GFX100.DNG)  
 5. Import the generated DNG files into Lightroom, edit, and export as JPG (e.g., DSC1000_GFX100.JPG)
@@ -76,6 +78,8 @@ Trick Lightroom은 RAW 파일의 카메라 EXIF 정보를 수정하여 라이트
 
 1. [Adobe 공식 웹사이트](https://helpx.adobe.com/kr/camera-raw/using/adobe-dng-converter.html)에서 Adobe DNG Converter를 다운로드하고 설치합니다
 2. [GitHub Releases](https://github.com/newboon/Trick_Lightroom/releases)에서 Trick Lightroom을 다운로드하고 실행합니다
+
+   macOS 버전은 여기로 가세요: https://github.com/dcbfs/Trick_Lightroom_Mac
 3. RAW 파일을 좌측 패널에 드래그 앤 드롭합니다 (예: DSC1000.ARW)
 4. 변환 버튼을 클릭하면 EXIF 정보가 변경된 DNG 파일이 생성됩니다 (예: DSC1000_GFX100.DNG)
 5. 생성된 DNG 파일을 라이트룸으로 불러와서 편집한 후 JPG 파일로 내보냅니다 (예: DSC1000_GFX100.JPG)
