@@ -55,6 +55,8 @@ LANGUAGES = {
         "error": "Error",
         "processing": "Processing...",
         "ready": "Ready",
+        "select_camera_msg": "Please select at least one target camera.",
+        "output_folder_not_exist_msg": "The specified output folder does not exist.",
         "select_output_folder_msg": "Please select an output folder first.",
     },
     "ko": {
@@ -91,6 +93,8 @@ LANGUAGES = {
         "error": "오류",
         "processing": "처리 중...",
         "ready": "준비됨",
+        "select_camera_msg": "하나 이상의 카메라를 선택해주세요.",
+        "output_folder_not_exist_msg": "지정된 저장 폴더가 존재하지 않습니다.",
         "select_output_folder_msg": "먼저 저장 폴더를 지정해주세요.",
     }
 }
@@ -565,22 +569,33 @@ class MainWindow(QMainWindow):
             return
         if not self.raw_files_paths: return
 
-        # 선택된 카메라 목록 가져오기
+        # 1. 선택된 카메라 목록 가져오기 및 유효성 검사
         selected_cameras = [cb.text() for cb in self.camera_checkboxes if cb.isChecked()]
         if not selected_cameras:
-            QMessageBox.warning(self, self.texts['error'], "Please select at least one target camera.")
+            # 번역키를 사용하여 메시지 표시
+            QMessageBox.warning(self, self.texts['error'], self.texts['select_camera_msg'])
             return
 
         output_path = ""
         if self.output_same_radio.isChecked():
             if self.raw_files_paths: output_path = os.path.dirname(self.raw_files_paths[0])
-        elif self.output_custom_radio.isChecked(): output_path = self.custom_folder_path_label.text()
-        if not output_path: QMessageBox.warning(self, self.texts['error'], self.texts['select_output_folder_msg']); return
+        elif self.output_custom_radio.isChecked():
+            output_path = self.custom_folder_path_label.text()
+
+        if not output_path:
+            QMessageBox.warning(self, self.texts['error'], self.texts['select_output_folder_msg'])
+            return
         
+        # 2. '폴더 지정' 시 해당 폴더가 실제로 존재하는지 확인
+        if self.output_custom_radio.isChecked() and not os.path.isdir(output_path):
+            QMessageBox.warning(self, self.texts['error'], self.texts['output_folder_not_exist_msg'])
+            return
+            
         options = {"dng_path": self.dng_path_edit.text(), "target_cameras": selected_cameras, "output_path": os.path.normpath(output_path)}
         
         self.worker = Worker('convert', self.raw_files_paths, options, self.exiftool_path)
         self.worker.progress.connect(self.update_status); self.worker.finished.connect(self.conversion_finished); self.worker.error.connect(self.show_error); self.worker.start(); self.convert_button.setEnabled(False); self.restore_button.setEnabled(False)
+
 
 
     def start_restore(self):
