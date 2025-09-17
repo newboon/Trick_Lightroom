@@ -6,6 +6,7 @@ import json
 import re
 from pathlib import Path
 import traceback
+import shutil
 
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
@@ -95,7 +96,16 @@ LANGUAGES = {
 }
 
 # 카메라 정보
-CAMERA_DATA = { "Canon EOS R5 Mark II": {"make": "Canon", "model": "Canon EOS R5m2", "unique": "Canon EOS R5 Mark II", "suffix": "R5M2"}, "Nikon Z8": {"make": "NIKON CORPORATION", "model": "NIKON Z 8", "unique": "Nikon Z 8", "suffix": "Z8"}, "Sony A1M2": {"make": "SONY", "model": "ILCE-1M2", "unique": "Sony ILCE-1M2", "suffix": "A1M2"}, "Fujifilm GFX100RF (Bayer Sensor)": {"make": "FUJIFILM", "model": "GFX100RF", "unique": "Fujifilm GFX 100RF", "suffix": "GFX100RF"}, "Fujifilm X-T5 (X-Trans Sensor)": {"make": "FUJIFILM", "model": "X-T5", "unique": "Fujifilm X-T5", "suffix": "XT5"}, "Panasonic LUMIX DC-S9": {"make": "Panasonic", "model": "DC-S9", "unique": "Panasonic DC-S9", "suffix": "S9"}, "Ricoh GR III": {"make": "RICOH", "model": "RICOH GR III", "unique": "RICOH GR III", "suffix": "GR3"}, "OM Digital OM-3": {"make": "OM Digital Solutions", "model": "OM-3", "unique": "OM Digital Solutions OM-3", "suffix": "OM3"}, }
+CAMERA_DATA = { 
+    "Canon EOS R5 Mark II": {"make": "Canon", "model": "Canon EOS R5m2", "unique": "Canon EOS R5 Mark II", "suffix": "R5M2"}, 
+    "Nikon Z8": {"make": "NIKON CORPORATION", "model": "NIKON Z 8", "unique": "Nikon Z 8", "suffix": "Z8"}, 
+    "Sony RX1R3": {"make": "SONY", "model": "DSC-RX1RM3", "unique": "Sony DSC-RX1RM3", "suffix": "RX1R3"}, 
+    "Fujifilm GFX100RF (Bayer Sensor)": {"make": "FUJIFILM", "model": "GFX100RF", "unique": "Fujifilm GFX 100RF", "suffix": "GFX100RF"}, 
+    "Fujifilm X-T5 (X-Trans Sensor)": {"make": "FUJIFILM", "model": "X-T5", "unique": "Fujifilm X-T5", "suffix": "XT5"}, 
+    "Panasonic LUMIX DC-S9": {"make": "Panasonic", "model": "DC-S9", "unique": "Panasonic DC-S9", "suffix": "S9"}, 
+    "Ricoh GR IV": {"make": "RICOH IMAGING COMPANY, LTD.", "model": "RICOH GR IV", "unique": "RICOH GR IV", "suffix": "GR4"}, 
+    "OM Digital OM-3": {"make": "OM Digital Solutions", "model": "OM-3", "unique": "OM Digital Solutions OM-3", "suffix": "OM3"}, 
+    }
 
 # --- 작업자 스레드 ---
 class Worker(QThread):
@@ -135,35 +145,50 @@ class Worker(QThread):
 
     def run_conversion(self):
         dng_converter_path = self.options['dng_path']
-        target_camera_key = self.options['target_camera']
+        target_cameras_keys = self.options['target_cameras']
         output_path = self.options['output_path']
-        target_camera = CAMERA_DATA[target_camera_key]
         successful_files = []
-        for i, file_path in enumerate(self.files): # file_path는 원본 경로 형식
+
+        for i, file_path in enumerate(self.files):
             self.progress.emit(f"Processing ({i+1}/{len(self.files)}): {os.path.basename(file_path)}")
             
-            # ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 이 부분 수정 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
-            # 외부 프로그램 호출 직전에만 경로를 OS 표준 형식으로 변환
+            # 1. DNG 변환 (소스 파일 당 한 번만 실행)
             normalized_file_path = os.path.normpath(file_path)
             dng_command_list = [dng_converter_path, "-d", output_path, normalized_file_path]
-            # ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-            
             self.run_command(dng_command_list)
+            
             base_name, _ = os.path.splitext(os.path.basename(file_path))
-            dng_file_path = os.path.join(output_path, f"{base_name}.dng")
-            if not os.path.exists(dng_file_path):
+            temp_dng_path = os.path.join(output_path, f"{base_name}.dng")
+
+            if not os.path.exists(temp_dng_path):
                 self.progress.emit(f"Failed to convert {os.path.basename(file_path)} to DNG.")
                 continue
-            exif_command_list = [self.exiftool_path, "-overwrite_original", f'-Make={target_camera["make"]}', f'-Model={target_camera["model"]}', f'-UniqueCameraModel={target_camera["unique"]}', dng_file_path]
-            self.run_command(exif_command_list)
-            new_filename = f"{base_name}_{target_camera['suffix']}.dng"
-            new_file_path = os.path.join(output_path, new_filename)
+
+            any_conversion_succeeded = False
             try:
-                os.rename(dng_file_path, new_file_path)
-                successful_files.append(file_path) # 성공 리스트에는 원본 경로를 추가
-            except OSError as e:
-                self.progress.emit(f"Failed to rename {os.path.basename(dng_file_path)}: {e}")
+                # 2. 선택된 각 카메라에 대해 DNG 파일 복사, EXIF 수정, 이름 변경 작업 반복
+                for target_camera_key in target_cameras_keys:
+                    target_camera = CAMERA_DATA[target_camera_key]
+                    
+                    final_filename = f"{base_name}_{target_camera['suffix']}.dng"
+                    final_filepath = os.path.join(output_path, final_filename)
+
+                    shutil.copy2(temp_dng_path, final_filepath)
+
+                    exif_command_list = [self.exiftool_path, "-overwrite_original", f'-Make={target_camera["make"]}', f'-Model={target_camera["model"]}', f'-UniqueCameraModel={target_camera["unique"]}', final_filepath]
+                    self.run_command(exif_command_list)
+                    any_conversion_succeeded = True
+
+            finally:
+                # 3. 모든 작업 완료 후 임시 DNG 파일 삭제
+                if os.path.exists(temp_dng_path):
+                    os.remove(temp_dng_path)
+
+            if any_conversion_succeeded:
+                successful_files.append(file_path)
+
         self.finished.emit(successful_files)
+
 
     def run_restore(self):
         original_exif_data = self.options['original_exif_data']
@@ -179,11 +204,9 @@ class Worker(QThread):
                 model = original_info.get("model", "")
                 unique_model = original_info.get("unique", f"{make} {model}")
                 
-                # ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 이 부분 수정 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
                 # 외부 프로그램 호출 직전에만 경로를 OS 표준 형식으로 변환
                 normalized_file_path = os.path.normpath(file_path)
                 exif_command_list = [self.exiftool_path, "-overwrite_original", f'-Make={make}', f'-Model={model}', f'-UniqueCameraModel={unique_model}', normalized_file_path]
-                # ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
                 
                 self.run_command(exif_command_list)
                 if remove_suffix:
@@ -220,7 +243,6 @@ class DragDropTableWidget(QTableWidget):
         self.setHorizontalHeaderLabels(headers)
         header = self.horizontalHeader()
 
-        # ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 이 부분 수정 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
         # 현재 헤더 구성: ['파일명', '기종', '작업 완료'] (3개 열)
         if column_count == 3:
             # 0번 열 ('파일명')은 내용에 맞게 크기 조절
@@ -234,7 +256,6 @@ class DragDropTableWidget(QTableWidget):
         else:
             # 예외적인 경우 (헤더 개수가 다를 때) 마지막 열만 늘어나도록 안전장치 설정
             header.setStretchLastSection(True)
-        # ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
     # --- 우클릭 컨텍스트 메뉴 이벤트 핸들러 ---
     def contextMenuEvent(self, event):
@@ -317,7 +338,7 @@ class MainWindow(QMainWindow):
 
     def init_ui(self):
         self.setWindowTitle(self.texts["window_title"])
-        self.setGeometry(100, 100, 900, 600)
+        self.setGeometry(100, 100, 900, 800)
         main_widget = QWidget()
         self.setCentralWidget(main_widget)
         main_layout = QVBoxLayout(main_widget)
@@ -342,10 +363,7 @@ class MainWindow(QMainWindow):
         if self.current_lang == "ko": self.radio_ko.setChecked(True)
         else: self.radio_en.setChecked(True)
         top_layout.addWidget(dng_path_group, 1)
-        
-        # ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 이 줄이 누락되었습니다 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
         top_layout.addWidget(lang_group)
-        # ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
         # RAW 파일 섹션 UI 구성
         self.raw_group = QGroupBox(self.texts["raw_to_dng_group"])
@@ -366,8 +384,20 @@ class MainWindow(QMainWindow):
         self.raw_table_widget = DragDropTableWidget(self.texts, allowed_extensions=raw_extensions)
         self.raw_table_widget.set_headers([self.texts["col_filename"], self.texts["col_model"], self.texts["col_status"]])
         self.raw_table_widget.filesDropped.connect(self.on_raw_files_dropped)
-        self.target_camera_combo = QComboBox()
-        self.target_camera_combo.addItems(CAMERA_DATA.keys())
+        
+        from PySide6.QtWidgets import QScrollArea
+        self.camera_checkboxes = []
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFixedHeight(120) # 스크롤 영역의 높이 고정
+        checkbox_container = QWidget()
+        checkbox_layout = QVBoxLayout(checkbox_container)
+        for camera_name in CAMERA_DATA.keys():
+            checkbox = QCheckBox(camera_name)
+            self.camera_checkboxes.append(checkbox)
+            checkbox_layout.addWidget(checkbox)
+        scroll_area.setWidget(checkbox_container)
+        
         self.output_same_radio = QRadioButton(self.texts["same_as_source"])
         self.output_custom_radio = QRadioButton(self.texts["select_folder"])
         self.output_same_radio.setChecked(True)
@@ -384,7 +414,9 @@ class MainWindow(QMainWindow):
         raw_layout.addLayout(raw_top_bar_layout)
         raw_layout.addWidget(self.raw_table_widget)
         raw_layout.addWidget(QLabel(self.texts["target_camera"]))
-        raw_layout.addWidget(self.target_camera_combo)
+        
+        raw_layout.addWidget(scroll_area) # 콤보박스 대신 스크롤 영역 추가
+
         raw_layout.addWidget(QLabel(self.texts["output_folder"]))
         raw_layout.addWidget(self.output_same_radio)
         raw_layout.addWidget(self.output_custom_radio)
@@ -392,7 +424,7 @@ class MainWindow(QMainWindow):
         raw_layout.addSpacing(20)
         raw_layout.addWidget(self.convert_button)
 
-        # JPG 복원 섹션 UI 구성
+        # JPG 복원 섹션 UI 구성 (기존 코드와 동일)
         self.jpg_group = QGroupBox(self.texts["jpg_restore_group"])
         jpg_layout = QVBoxLayout(self.jpg_group)
         jpg_top_bar_layout = QHBoxLayout()
@@ -425,6 +457,7 @@ class MainWindow(QMainWindow):
         main_layout.addLayout(top_layout)
         main_layout.addLayout(columns_layout)
         self.statusBar().showMessage(self.texts["ready"])
+
 
     def change_language(self, lang):
         if (self.radio_en.isChecked() and self.current_lang != "en") or (self.radio_ko.isChecked() and self.current_lang != "ko"): self.current_lang = lang
@@ -528,18 +561,27 @@ class MainWindow(QMainWindow):
     def start_conversion(self):
         dng_path = self.dng_path_edit.text()
         if not dng_path:
-            # 번역키를 사용하여 메시지 박스 생성
             QMessageBox.warning(self, self.texts['error'], self.texts['dng_converter_not_found'])
-            return # 함수 실행 중단
+            return
         if not self.raw_files_paths: return
+
+        # 선택된 카메라 목록 가져오기
+        selected_cameras = [cb.text() for cb in self.camera_checkboxes if cb.isChecked()]
+        if not selected_cameras:
+            QMessageBox.warning(self, self.texts['error'], "Please select at least one target camera.")
+            return
+
         output_path = ""
         if self.output_same_radio.isChecked():
             if self.raw_files_paths: output_path = os.path.dirname(self.raw_files_paths[0])
         elif self.output_custom_radio.isChecked(): output_path = self.custom_folder_path_label.text()
         if not output_path: QMessageBox.warning(self, self.texts['error'], self.texts['select_output_folder_msg']); return
-        options = {"dng_path": self.dng_path_edit.text(), "target_camera": self.target_camera_combo.currentText(), "output_path": os.path.normpath(output_path)}
+        
+        options = {"dng_path": self.dng_path_edit.text(), "target_cameras": selected_cameras, "output_path": os.path.normpath(output_path)}
+        
         self.worker = Worker('convert', self.raw_files_paths, options, self.exiftool_path)
         self.worker.progress.connect(self.update_status); self.worker.finished.connect(self.conversion_finished); self.worker.error.connect(self.show_error); self.worker.start(); self.convert_button.setEnabled(False); self.restore_button.setEnabled(False)
+
 
     def start_restore(self):
         if not self.jpg_files_paths: return
